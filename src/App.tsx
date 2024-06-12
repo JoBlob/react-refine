@@ -1,19 +1,24 @@
 import "./App.css";
-import { Refine } from "@refinedev/core";
+import { Authenticated, Refine } from "@refinedev/core";
 import { dataProvider } from "./providers/data-provider";
-import { ShowProduct } from "./products/show";
-import { EditProduct } from "./products/edit";
-import { ListProducts } from "./products/list";
-import { CreateProduct } from "./products/create";
+import { ShowProduct } from "./pages/products/show";
+import { EditProduct } from "./pages/products/edit";
+import { ListProducts } from "./pages/products/list";
+import { CreateProduct } from "./pages/products/create";
+import { authProvider } from "./providers/auth-provider";
+import { Login } from "./pages/login";
+import { Header } from "./components/header";
 
 function App() {
   return (
-    <Refine dataProvider={dataProvider}>
-      <ListProducts />
-      {/* <CreateProduct />
-      <ShowProduct />
-      <EditProduct />
-       */}
+    <Refine dataProvider={dataProvider} authProvider={authProvider}>
+      <Header />
+      <Authenticated key="protected" fallback={<Login />}>
+        {/* <ShowProduct /> */}
+        {/* <EditProduct /> */}
+        <ListProducts />
+        {/* <CreateProduct /> */}
+      </Authenticated>
     </Refine>
   );
 }
