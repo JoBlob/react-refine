@@ -1,9 +1,15 @@
 import { useForm, useSelect } from "@refinedev/core";
 
 export const CreateProduct = () => {
+  // const { onFinish, mutationResult } = useForm({
+  //   action: "create",
+  //   resource: "products",
+  // });
+  // inferred
   const { onFinish, mutationResult } = useForm({
-    action: "create",
-    resource: "products",
+    // We can also provide `false` to disable the redirect.
+    // Default value is `"list"`.
+    redirect: "edit",
   });
 
   const { options } = useSelect({

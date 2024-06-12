@@ -1,4 +1,5 @@
-import { useTable } from "@refinedev/core";
+import { useNavigation, useTable } from "@refinedev/core";
+import { Link } from "react-router-dom";
 
 export const ListProducts = () => {
   const {
@@ -9,10 +10,15 @@ export const ListProducts = () => {
     sorters,
     setSorters,
   } = useTable({
-    resource: "protected-products",
+    // inffered
+    // resource: "protected-products",
     pagination: { current: 1, pageSize: 10 },
     sorters: { initial: [{ field: "id", order: "asc" }] },
+    // auto query-params
+    syncWithLocation: true,
   });
+
+  const { showUrl, editUrl } = useNavigation();
 
   const onPrevious = () => {
     if (current > 1) {
@@ -80,6 +86,7 @@ export const ListProducts = () => {
             <th onClick={() => onSort("price")}>
               Price {indicator[getSorter("price") || "asc"]}
             </th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -90,6 +97,14 @@ export const ListProducts = () => {
               <td>{product.category?.id}</td>
               <td>{product.material}</td>
               <td>{product.price}</td>
+              <td>
+                <Link to={showUrl("protected-products", product.id || "")}>
+                  Show
+                </Link>
+                <Link to={editUrl("protected-products", product.id || "")}>
+                  Edit
+                </Link>
+              </td>
             </tr>
           ))}
         </tbody>

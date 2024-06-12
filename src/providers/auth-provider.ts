@@ -42,7 +42,8 @@ export const authProvider: AuthProvider = {
       return { success: true };
     }
 
-    return { success: false };
+    // Let's redirect to the index page after a successful login.
+    return { success: false, redirectTo: "/" };
   },
   check: async () => {
     // When logging in, we'll obtain an access token from our API and store it in the local storage.
@@ -55,7 +56,7 @@ export const authProvider: AuthProvider = {
   logout: async () => {
     localStorage.removeItem("my_access_token");
     // We're returning success: true to indicate that the logout operation was successful.
-    return { success: true };
+    return { success: true, redirectTo: "/login" };
   },
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onError: async (error) => {

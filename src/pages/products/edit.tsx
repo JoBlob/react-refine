@@ -1,12 +1,18 @@
 import { useForm, useSelect } from "@refinedev/core";
 
 export const EditProduct = () => {
+  // const { onFinish, mutationResult, queryResult } = useForm({
+  //   action: "edit",
+  //   resource: "products",
+  //   id: "123",
+  // });
+  // inferred
   const { onFinish, mutationResult, queryResult } = useForm({
-    action: "edit",
-    resource: "products",
-    id: "123",
+    // This will redirect to the show page after the mutation is successful.
+    // Default value is `"list"`.
+    // We can also provide `false` to disable the redirect.
+    redirect: "show",
   });
-
   const record = queryResult?.data?.data;
 
   const { options } = useSelect({
