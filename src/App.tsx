@@ -20,7 +20,7 @@ function App() {
   return (
     <BrowserRouter>
       {/* We're using Refine's Blue theme here. You can use other variants or create your own theme without constraints. */}
-      <ThemeProvider theme={RefineThemes.MagentaDark}>
+      <ThemeProvider theme={RefineThemes.GreenDark}>
         <CssBaseline />
         <GlobalStyles styles={{ html: { WebkitFontSmoothing: "auto" } }} />
         <Refine

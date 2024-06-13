@@ -1,131 +1,109 @@
-import { useNavigation, useTable } from "@refinedev/core";
-import { Link } from "react-router-dom";
+import React from "react";
+import { useMany, useSelect } from "@refinedev/core";
+import { useDataGrid, EditButton, ShowButton } from "@refinedev/mui";
+
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 
 export const ListProducts = () => {
-  const {
-    tableQueryResult: { data, isLoading },
-    current,
-    setCurrent,
-    pageCount,
-    sorters,
-    setSorters,
-  } = useTable({
-    // inffered
-    // resource: "protected-products",
-    pagination: { current: 1, pageSize: 10 },
+  const { dataGridProps } = useDataGrid<IProduct>({
     sorters: { initial: [{ field: "id", order: "asc" }] },
-    // auto query-params
     syncWithLocation: true,
   });
 
-  const { showUrl, editUrl } = useNavigation();
+  const {
+    options: categories,
+    queryResult: { isLoading },
+  } = useSelect<ICategory>({
+    resource: "categories",
+  });
 
-  const onPrevious = () => {
-    if (current > 1) {
-      setCurrent(current - 1);
-    }
-  };
+  // const { data: categories, isLoading } = useMany<ICategory>({
+  //   resource: "categories",
+  //   ids: dataGridProps?.rows?.map((product) => product.category?.id) ?? [],
+  // });
 
-  const onNext = () => {
-    if (current < pageCount) {
-      setCurrent(current + 1);
-    }
-  };
+  const columns = React.useMemo<GridColDef<IProduct>[]>(
+    () => [
+      {
+        field: "id",
+        headerName: "ID",
+        type: "number",
+        width: 50,
+      },
+      {
+        field: "name",
+        headerName: "Name",
+        minWidth: 300,
+        flex: 1,
+      },
+      {
+        field: "category.id",
+        headerName: "Category",
+        minWidth: 250,
+        flex: 0.5,
+        // We're defining the column type as `singleSelect` and providing the options to the `valueOptions` prop.
+        type: "singleSelect",
+        valueOptions: categories,
+        // Since now the options are in an object format, we need to provide the `valueFormatter` prop to pick the value of the option.
+        valueFormatter: (params: { value: unknown }) => {
+          if (params) params.value;
+        },
+        renderCell: function render({ row }) {
+          if (isLoading) {
+            return "Loading...";
+          }
 
-  const onPage = (page: number) => {
-    setCurrent(page);
-  };
+          return categories?.find(
+            (category) => category.value == row.category.id
+          )?.label;
+        },
+      },
+      {
+        field: "material",
+        headerName: "Material",
+        minWidth: 120,
+        flex: 0.3,
+      },
+      {
+        field: "price",
+        headerName: "Price",
+        minWidth: 120,
+        flex: 0.3,
+      },
+      {
+        field: "actions",
+        headerName: "Actions",
+        renderCell: function render({ row }) {
+          return (
+            <div>
+              <EditButton hideText recordItemId={row.id} />
+              <ShowButton hideText recordItemId={row.id} />
+            </div>
+          );
+        },
+      },
+    ],
+    [categories, isLoading]
+  );
 
-  // We'll use this function to get the current sorter for a field.
-  const getSorter = (field: string) => {
-    const sorter = sorters?.find((sorter) => sorter.field === field);
-
-    if (sorter) {
-      return sorter.order;
-    }
-  };
-
-  // We'll use this function to toggle the sorters when the user clicks on the table headers.
-  const onSort = (field: string) => {
-    const sorter = getSorter(field);
-    setSorters(
-      sorter === "desc"
-        ? []
-        : [
-            {
-              field,
-              order: sorter === "asc" ? "desc" : "asc",
-            },
-          ]
-    );
-  };
-
-  // We'll use this object to display visual indicators for the sorters.
-  const indicator = { asc: "⬆️", desc: "⬇️" };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
+  //  Known type issue with dataGrid https://github.com/refinedev/refine/issues/5997
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <h1>Products</h1>
-      <table>
-        <thead>
-          <tr>
-            <th onClick={() => onSort("id")}>
-              ID {indicator[getSorter("id") || "asc"]}
-            </th>
-            <th onClick={() => onSort("name")}>
-              Name {indicator[getSorter("name") || "asc"]}
-            </th>
-            <th>Category</th>
-            <th onClick={() => onSort("material")}>
-              Material {indicator[getSorter("material") || "asc"]}
-            </th>
-            <th onClick={() => onSort("price")}>
-              Price {indicator[getSorter("price") || "asc"]}
-            </th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data?.data?.map((product) => (
-            <tr key={product.id}>
-              <td>{product.id}</td>
-              <td>{product.name}</td>
-              <td>{product.category?.id}</td>
-              <td>{product.material}</td>
-              <td>{product.price}</td>
-              <td>
-                <Link to={showUrl("protected-products", product.id || "")}>
-                  Show
-                </Link>
-                <Link to={editUrl("protected-products", product.id || "")}>
-                  Edit
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="pagination">
-        <button type="button" onClick={onPrevious}>
-          {"<"}
-        </button>
-        <div>
-          {current - 1 > 0 && (
-            <span onClick={() => onPage(current - 1)}>{current - 1}</span>
-          )}
-          <span className="current">{current}</span>
-          {current + 1 < pageCount && (
-            <span onClick={() => onPage(current + 1)}>{current + 1}</span>
-          )}
-        </div>
-        <button type="button" onClick={onNext}>
-          {">"}
-        </button>
-      </div>
+      <DataGrid {...dataGridProps} columns={columns} autoHeight />
     </div>
   );
 };
+
+interface IProduct {
+  id: number;
+  name: string;
+  material: string;
+  price: string;
+  category: ICategory;
+}
+
+interface ICategory {
+  id: number;
+  title: string;
+}
